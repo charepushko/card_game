@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>gamer hell login</title>
+    <link rel='stylesheet prefetch' href='http://netdna.bootstrapcdn.com/font-awesome/3.2.0/css/font-awesome.min.css'>
+    <link rel="stylesheet" href="static/css/style.css" media="screen" type="text/css" />
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body background="http://www.macgamestore.com/images_screenshots/nancy-drew-shadow-at-the-waters-edge-8426.jpg">
+
+<center>
+
+              <div style="width:392px; background-image: url(static/machinelog.png) ; height: 492px;">
+        <div class="box">
+
+                  <ul id="tabs" class="nav nav-tabs">
+                     <li> <a id="tabLogin" class="iconLogin active blueBox" title="Войти"></a> </li> 
+                     <li> <a id="tabRegister" class="iconRegister greenBox" title="Регистрация"></a> </li> 
+                     <li> <a id="tabForgot" class="iconForgot redBox" title="Забыл пароль?"></a> </li>
+                  </ul>
+                       
+                  <div  class="containerWrapper">
+                      
+                      <!-- login container -->
+                        <div id="containerLogin" class="tabContainer active" style="border: 0px;">  
+                          <form method="post" >   
+                              {{form_l.hidden_tag()}}
+                              <h3 class="loginTitle">Авторизация</h3>                    
+                              <div class="loginContent">                    
+                                <div class="inputWrapper">                    
+                                    {{form_l.openid(placeholder="E-mail")}}
+                                </div>                    
+                                <div class="inputWrapper">                    
+                                    {{form_l.password(placeholder="Password")}}                    
+                                </div>
+                              </div>                    
+                                    {{form_l.remember_me()}} Запомнить
+                              <input class="blueBox" type="submit" value=" Войти"><span class="iconLogin"></span></input>
+
+
+                              <div class="clear"></div>                    
+                           </form>                    
+                        </div>
+                    
+                      <!-- register container -->                    
+                        <div id="containerRegister" class="tabContainer">                    
+                          <form method="post">  
+                            {{form_s.hidden_tag()}}                  
+                            <h3 class="loginTitle">Регистрация</h3>                    
+                            <div class="registerContent"">                    
+                              <div class="inputWrapper">
+                                 {{form_s.login(placeholder="Ваше имя")}}                    
+                              </div>                    
+                              <div class="inputWrapper">
+                                {{form_s.email(placeholder="Ваш email")}}                    
+                              </div>                    
+                              <div class="inputWrapper">
+                                {{form_s.password(placeholder="Ваш пароль")}}
+                            </div>
+                            <button class="greenBox" type="submit"><span class="iconRegister"></span> Зарегистрироваться</button>                    
+                            <div class="clear"></div>                    
+                          </form>                    
+                        </div>                    
+                        <div class="clear"></div>                    
+                    
+                    
+                      <!-- forgot container -->                    
+                        <div id="containerForgot" class="tabContainer">                    
+                          <form>             
+                            <h3 class="loginTitle">Восстановить пароль</h3>                    
+                            <div class="loginContent">                    
+                              <div class="inputWrapper">                    
+                                <input type="text" placeholder="Ваш email" />                    
+                              </div>                    
+                              <div class="placeholder"></div>                    
+                            </div>                    
+                            <button class="redBox"><span class="iconForgot"></span> Восстановить</button>                    
+                            <div class="clear"></div>                    
+                          </form>                    
+                        </div>                    
+                        <div class="clear"></div>   
+              
+                   </div>
+                    
+
+                  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script> 
+                  <script src="static/js/loginwr.js"></script>
+
+
+        </div>
+          </div>
+
+</center>
+
+</body>
+</html>
