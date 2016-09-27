@@ -1,71 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
 
-<html style="height: 100%;">
-<head>
+  <button onClick='location.href="/create_game"'> 
+  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create Game</button>
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      {% for game in games %}
+	<div class="row" width="96%" >
+		<div width="48%" align="left"> <h2>Game #{{game.id}}</h2> <br> with {{game.username}}</div>            
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link href="static/css/bootstrap.min.css" rel="stylesheet">
-
-    <title> gamer hell</title>
-
-</head>
-
-<body style="min-height: 100%; position: relative; " background="static/bg.png" align="center">
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"> </script>
-    <script src="static/js/bootstrap.min.js"></script>
-
-    <div class="container">
-
-      <center>
-        <div class="navbar navbar-default" role="navigation" style="background: linear-gradient(to top, #454545, #666666); border: 0px; width: 53%; align: center; margin: 0px; border-radius: 0 0 10px 10px; padding: 0px;">
-            <div class="navbar-header" align="right">
-                
-                
-            <button onClick='location.href="/create_game"'>Create Game</button><br />
-            LOGOUT -> 
-                <button onClick='location.href="/logout"' class="btn btn-default navbar-btn" style="background-image: url(static/b-bye.png); margin: 0px;  height: 46px; color: #E0E0E0; border-radius: 24px; width: 47px; ">  </button>
-
-            </div>
-        </div>
-      </center>
-
-        <div class="row">
+		<div width="48%" align="right"> <a href='game/{{game.id}}'>Join Game #{{game.id}}</a><br />  </div>
+	</div>
+	<hr>
+      {% endfor %}
 
 
-            <div class="col-md-3"> </div>
-
-
-            {% for game in games %}
-              <a href='game/{{game}}'>Game #{{game}}</href><br />
-            {% endfor %}
-               <div style="height: 430px;"> </div> -->
-
-
-
-            </div>
-
-
-
-            <div class="col-md-3"> </div>
-
-
-        </div>
-    </div>
-<div class="footer" style="position: absolute; bottom: 0; width: 100%;" align="center"><div class="container">
-    <div class="row">
-        <div class="col-md-2"> </div>
-            <div class="col-md-1">
-
-            <div class="col-md-2">
-            </div>
-
-            </div>
-            <div class="col-md-3"> </div>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+{% endblock %}
