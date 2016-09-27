@@ -20,6 +20,13 @@ class Gamestate(object):
         self.room = 0
         self.num_players = 0
         self.turn = 0
+	self.creator = 0
+
+    def get_creator(self):
+        u = load_user(self.creator)
+        return u.nickname
+
+
 
 class GameSessionManager(object):
     def __init__(self):
@@ -30,7 +37,7 @@ class GameSessionManager(object):
         self.games[id] = Gamestate()
 
     def game_ids(self):
-        return self.games.keys()
+        return self.games #.keys()
 
     def get_game(self, id):
         return self.games[id]
@@ -103,13 +110,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/fighted')
-def fighted():
-    users = g.user.follows_you().all()
-    return render_template("followers.html",
-        users = users,
-        user = g.user)
-
 
 @app.route('/game/<game_id>')
 def game(game_id):
@@ -130,6 +130,7 @@ def game(game_id):
 def create_game():
     id = hash(random())
     GM.add_game(id)
+    GM.games[id].creator = g.user.id
     return redirect(url_for('game', game_id=id))
 
 
