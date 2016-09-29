@@ -1,7 +1,6 @@
-from flask import render_template, flash, redirect, session, url_for, request, g
+'''from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import login_user, logout_user, current_user, login_required
-from app import app, db, lm, models, forms
-# from run import socketio
+from app import app, db, lm, models, forms, socketio
 
 from forms import LoginForm, SignUpForm
 from models import User 
@@ -21,6 +20,7 @@ class Gamestate(object):
         self.num_players = 0
         self.turn = 0
 	self.creator = 0
+        self.players = []
 
     def get_creator(self):
         u = load_user(self.creator)
@@ -91,8 +91,6 @@ def login():
             u = User(nickname=form_s.login.data, email=form_s.email.data, password=md5(form_s.password.data).hexdigest())
             db.session.add(u)
             db.session.commit()
-#            db.session.add(u.follow(u))
-#            db.session.commit()
             login_user(u)
             return redirect(url_for('index'))
         else:
@@ -123,7 +121,8 @@ def game(game_id):
         else:
             redirect(url_for('index', games=GM.game_ids()))
 
-    return render_template('game.html', game_id=game_id)
+#    return render_template('game.html', game_id=game_id)
+    return render_template('front.html', game_id=game_id)
 
 
 @app.route('/create_game')
@@ -134,8 +133,9 @@ def create_game():
     return redirect(url_for('game', game_id=id))
 
 
-''' @socketio.on('connect', namespace='/ws')
+@socketio.on('connect', namespace='/ws')
 def on_connect(data):
+    
     emit('Responce', {'data': 'got it!'})
 
 def ack():
@@ -147,17 +147,17 @@ def test_connect():
 
 @socketio.on('join', namespace='/ws')
 def on_join(data):
-    username = g.user.nickname
+    username = data['username']
     game_id = room = data['room']
-    emit('join', username + ' has entered the room.', room=room,
-                                                    namespace='/ws',
-                                                    broadcast=True,
-                                                    callback=ack)
-
     game = GM.get_game(game_id)
-    game.room = room if game.room != 0 else game.room
-
+    game.room = room # if game.room != 0 else game.room
     join_room(room)
+    game.players[game.num_players - 1] = username
+    print username + " connected"
+    if (game.num_players == MAX_PLAYERS):
+        #create cards here!
+        emit('start_game', data, room=room, namespace='/ws', broadcast=True)
+
 
 @socketio.on('leave', namespace='/ws')
 def on_leave(data):
@@ -170,4 +170,7 @@ def on_leave(data):
     game = GM.get_game(game_id)
     game.players.remove(username)
     leave_room(room)
+@socketio.on('message')
+def on_message(data):
+    print 'lek'
 '''

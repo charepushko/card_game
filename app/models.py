@@ -1,11 +1,5 @@
 from app import db
 
-opponents = db.Table('opponents',
-    db.Column('game_id', db.Integer, primary_key=True, unique=True),
-    db.Column('opponent1_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('opponent2_id', db.Integer, db.ForeignKey('user.id'))
-)
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -17,13 +11,6 @@ class User(db.Model):
     games = db.Column(db.Integer, index=True)
     wins = db.Column(db.Integer, index=True)
 
-    # who have fighted with
-    fighted = db.relationship('User',
-        secondary = opponents,
-        primaryjoin = (opponents.c.opponent1_id == id),
-        secondaryjoin = (opponents.c.opponent2_id == id),
-        backref = db.backref('opponents', lazy='dynamic'),
-        lazy='dynamic')
 
     def __repr__(self):
         return '<User %r>' % (self.nickname)
