@@ -66,6 +66,10 @@
 
 		socket_ws.on('user_change', function(data) {
 			var turn = JSON.parse(data)['turn'];
+                        for (var i = 0; i < 10; i++) {
+                                if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = false; }
+                        }
+
 			if (({{g.user.id}} == creator) && (turn == false)) {
 				for (var i = 10; i < 13; i++) {
 					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
@@ -83,10 +87,7 @@
 				}
 				alert('your turn'); 
 			} else {
-                                for (var i = 10; i < 13; i++) {
-                                        if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
-                                }
-                                for (var i = 13; i < 16; i++) {
+                                for (var i = 0; i < 16; i++) {
                                         if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
                                 }
 			}
@@ -117,6 +118,7 @@
 						if (laid > 0 && card_places[i] == laid) {
 							 used_cards[laid-10].originx = used_cards[laid-10].position.x;
 							 used_cards[laid-10].originy = used_cards[laid-10].position.y;
+//							 used_cards[laid-10].block = false;
 							 socket_ws.emit('card_laid', {room: {{game_id}}, username : '{{g.user.nickname}}', laid : laid, i : i, x : used_cards[laid-10].originx, y : used_cards[laid-10].originy});
 							 card_places[i] = 0;
 							 laid = 0;
@@ -139,6 +141,7 @@
                         used_cards[laid1-10].originy = y1;
                         used_cards[laid1-10].position.x = x1;
                         used_cards[laid1-10].position.y = y1;
+//			used_cards[laid1-10].block = false;
                         card_places[i1] = 0;			
 		}		
 	});
@@ -192,7 +195,8 @@
 					for (var i = 0; i < summator.length; i++) {
 						if (getPlace(summator[i]) > 9) {
 							var need = summator[i];
-							if (need % 10 == 0) { need = 10; } else { need = need % 10; }  }
+							if (need % 10 == 0) { need = 10; } else { need = need % 10; }
+						}
 						else if (summator[i] % 10 == 0) { sum += 10; }
 						 else {sum += summator[i] % 10;}
 					}
@@ -207,7 +211,8 @@
 						summator.splice(0, summator.length);
 						if (scopa()) { 
 							socket_ws.emit('scopa', {room: {{game_id}}, username : '{{g.user.nickname}}'});
-						} else { alert('Nauchis schitat');}
+						}
+					} else { alert('Nauchis schitat');}
 					socket_ws.emit('change_user', {room: {{game_id}} });
 					empty_hands();
 				}
@@ -215,16 +220,13 @@
 
 
 		socket_ws.on('card_taken', function(data) {
-			var summator = JSON.parse(data)['taken'];
-			console.log(summator);
+			var my_summator = JSON.parse(data)['taken'];
 			var nick = data['username'];			
 			if ('{{g.user.nickname}}' != nick) {
-				for (var i = 0; i < summator.length; i++) {
+				for (var i = 0; i < my_summator.length; i++) {
 					for (var j = 0; j < 16; j++) {
-						if (card_places[j] == summator[i]) { card_places[j] = 0;} }
-					console.log("removing");
-					stage.removeChild(used_cards[summator[i]-10]); 
-					console.log("removed");
+						if (card_places[j] == my_summator[i]) { card_places[j] = 0;} }
+					stage.removeChild(used_cards[my_summator[i]-10]); 
 				}
 			
 			}

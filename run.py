@@ -214,7 +214,7 @@ def take(data):
 	    flag = 2
 	summator = json.loads(data['taken'])
 	for i in summator:
-	    game.score[i] = flag
+	    game.score[i-10] = flag
 	data = json.dumps({'username' : username, 'taken' : summator})
 	emit('card_taken', data, room=room, namespace='/ws', broadcast=True)
 
