@@ -223,6 +223,50 @@ def take(data):
 	data = json.dumps({'username' : username, 'taken' : summator})
 	emit('card_taken', data, room=room, namespace='/ws', broadcast=True)
 
+@socketio.on('game_end', namespace='/ws')
+def take(data):
+	room = data['room']
+	username = data['username']
+	game = GM.get_game(room)
+	user = load_user(game.creator)
+	if (user.nickname == username):
+	    flag = 1
+	else:
+	    flag = 2
+	summator = json.loads(data['taken'])
+	for i in summator:
+	    game.score[i-10] = flag
+
+	sum = 0
+	for i in range(40):
+		sum += game.score[i-10]
+	user1 = game.score[40]
+	user2 = game.score[41]
+
+	if sum > 60:
+		user2 += 1
+	if sum < 60:
+		user1 += 1
+	sum = 0
+	for i in range(10):
+		sum += game.score[i-10]
+	if sum > 15:
+		user2 += 1
+	if sum < 15:
+		user1 += 1
+	if game.score[7] == 1:
+		user1 += 1
+	else:
+		user2 += 1
+
+	data = json.dumps({'user1' : user1, 'user2' : user2, 'scopa1' : game.score[40], 'scopa2' : game.score[41]})
+	emit('results', data, room=room, namespace='/ws', broadcast=True)
+
+
+
+
+
+
 @socketio.on('scopa', namespace='/ws')
 def on_scopa(data):
 	room = data['room']
@@ -246,7 +290,9 @@ def on_color(data):
 	print "colured card =  ", card
 	emit('card_color', newd, room=room, namespace='/ws', broadcast=True)
 
-@socketio.on('leave', namespace='/ws')
+
+
+@socketio.on('end', namespace='/ws')
 def on_leave(data):
     username = g.user.nickname
     game_id = room = data['room']
@@ -256,7 +302,11 @@ def on_leave(data):
                                                     callback=ack)
     game = GM.get_game(game_id)
     game.players.remove(username)
+    game.num_players -= 1
+    if game.num_players == 0:
+	del GM.games[game_id]
     leave_room(room)
+    return render_template('index.html', games = GM.game_ids(), )
 
 
 
