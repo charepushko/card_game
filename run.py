@@ -202,6 +202,11 @@ def lay(data):
 	room = data['room']
 	emit('card_laid', data, room=room, namespace='/ws', broadcast=True)
 
+@socketio.on('card_drag', namespace='/ws')
+def drag(data):
+	room = data['room']
+	emit('card_drag', data, room=room, namespace='/ws', broadcast=True)
+
 @socketio.on('card_taken', namespace='/ws')
 def take(data):
 	room = data['room']

@@ -291,6 +291,20 @@
 			used_cards[picnum-10] = card_back;
 
 
+
+	socket_ws.on('card_drag', function(data) {
+		var user1 = data['username'];
+		if ('g.user.nickname' != user1) {
+			var card = data['card'];
+			var x1 = data['x'];
+			var y1 = data['y'];
+                        used_cards[card-10].position.x = x1;
+                        used_cards[card-10].position.y = y1;
+		}		
+	});
+
+
+
     card_back
 
        // events for drag start
@@ -439,6 +453,7 @@
 				if (newPos.x > 800 || newPos.x < 0 || newPos.y > 600 || newPos.y < 0) {} else {
 					this.position.x = newPos.x;
 					this.position.y = newPos.y; }
+				socket_ws.emit('card_drag', {room: {{game_id}}, username : '{{g.user.nickname}}', card : this.picnum, x : newPos.x, y : newPos.y});
 			}
 		}
 
