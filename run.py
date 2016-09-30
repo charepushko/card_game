@@ -28,6 +28,7 @@ class Gamestate(object):
 	self.round = 0
         self.players = []
 	self.used_cards = [0 for i in range(40)]
+	self.score = [0 for i in range(42)]
 
     def get_creator(self):
         u = load_user(self.creator)
@@ -181,8 +182,41 @@ def rounding(data):
                 pics[i] = picnum
             game.round += 1
             data = json.dumps({'array_cards' : pics, 'round' : game.round})
-        emit('round', data, room=room, namespace='/ws', broadcast=True)
+            emit('round', data, room=room, namespace='/ws', broadcast=True)
 
+@socketio.on('card_laid', namespace='/ws')
+def lay(data):
+	room = data['room']
+	emit('card_laid', data, room=room, namespace='/ws', broadcast=True)
+
+@socketio.on('card_taken', namespace='/ws')
+def take(data):
+	room = data['room']
+	username = data['username']
+	game = GM.get_game(room)
+	user = load_user(game.creator)
+	if (user.nickname == username):
+	    flag = 1
+	else:
+	    flag = 2
+	summator = json.loads(data['taken'])
+	for i in summator:
+	    game.score[i] = flag
+	data = json.dumps({'username' : username, 'taken' : summator})
+	emit('card_taken', data, room=room, namespace='/ws', broadcast=True)
+
+@socketio.on('scopa', namespace='/ws')
+def on_scopa(data):
+	room = data['room']
+	username = data['username']
+	game = GM.get_game(room)
+	user = load_user(game.creator)
+	if (user.nickname == username):
+	    flag = 1
+	else:
+	    flag = 2
+	game.score[39 + flag] += 1
+	emit('scopa', data, room=room, namespace='/ws', broadcast=True)
 
 @socketio.on('color', namespace='/ws')
 def on_color(data):
@@ -191,6 +225,7 @@ def on_color(data):
 	username = data['username']
 	print data
 	newd = json.dumps({'username' : username, 'card' : card})
+	print "colured card =  ", card
 	emit('card_color', newd, room=room, namespace='/ws', broadcast=True)
 
 @socketio.on('leave', namespace='/ws')
