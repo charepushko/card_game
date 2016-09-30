@@ -23,7 +23,7 @@ class Gamestate(object):
         super(Gamestate, self).__init__()
         self.room = 0
         self.num_players = 0
-        self.turn = 0
+        self.turn = True
 	self.creator = 0
 	self.round = 0
         self.players = []
@@ -152,9 +152,22 @@ def on_join(data):
     join_room(room)
     game.players.append(username)
     if (game.num_players == MAX_PLAYERS):
-        print game.num_players
-        emit('start_game', data, room=room, namespace='/ws', broadcast=True)
-#	rounding(json.dumps({'room' : room}))
+	cr = game.creator
+	ndata = json.dumps({'creator_id' : cr})
+	print 'creator id %d' %(cr)
+        emit('start_game', ndata, room=room, namespace='/ws', broadcast=True)
+#	turn(json.dumps({'room' : room}))
+
+@socketio.on('change_user', namespace='/ws')
+def turn(data):
+	room = data['room']
+	game = GM.get_game(room)
+	game.turn = not game.turn
+	print 'turn of %d' %(game.turn)
+	turn = game.turn
+	data = json.dumps({'turn' : turn})
+        emit('user_change', data, room=room, namespace='/ws', broadcast=True)
+
 
 @socketio.on('need_round', namespace='/ws')
 def rounding(data):

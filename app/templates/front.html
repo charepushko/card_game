@@ -23,9 +23,10 @@
 
 
 
-    socket_ws.on('start_game', function() { 
+    socket_ws.on('start_game', function(data) { 
          alert('all connected!'); 
 
+		var creator = JSON.parse(data)['creator_id'];
 
 		var stage = new PIXI.Container();
 
@@ -57,36 +58,42 @@
 		}
 		console.log("variables declared");
 		empty_hands();
-//	        socket_ws.emit('need_round', {room: {{game_id}} });
 		
 //change user
 
 		var user1 = [];
 		var user2 = [];
 
-		var user = false;
-		function changeUser() {
-/*			if (user) {
+		socket_ws.on('user_change', function(data) {
+			var turn = JSON.parse(data)['turn'];
+			if (({{g.user.id}} == creator) && (turn == false)) {
 				for (var i = 10; i < 13; i++) {
 					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
 				}
 				for (var i = 13; i < 16; i++) {
 					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = false; }
 				}
+				alert('your turn'); 
+			} else if(({{g.user.id}} != creator) && (turn == true)) {
+				for (var i = 10; i < 13; i++) {
+					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = false; }
+				}
+				for (var i = 13; i < 16; i++) {
+					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
+				}
+				alert('your turn'); 
 			} else {
-				for (var i = 10; i < 13; i++) {
-					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = false; }
-				}
-				for (var i = 13; i < 16; i++) {
-					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
-				}
+                                for (var i = 10; i < 13; i++) {
+                                        if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
+                                }
+                                for (var i = 13; i < 16; i++) {
+                                        if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
+                                }
 			}
-			user = !user;
-//			if (user) { alert('��� ������'); } else { alert('��� �����'); }  */
-		}
+		});
 
-
-
+	        if ({{g.user.id}} == creator) { socket_ws.emit('change_user', {room: {{game_id}} }); }
+		
 
 
 //lay functions
@@ -115,7 +122,7 @@
 							 laid = 0;
 						}
 					}
-					changeUser();
+					socket_ws.emit('change_user', {room: {{game_id}}});
 					empty_hands();
 				}
 
@@ -193,14 +200,15 @@
 						socket_ws.emit('card_taken', {room: {{game_id}}, username : '{{g.user.nickname}}', taken : JSON.stringify(summator)});
 						for (var i = 0; i < summator.length; i++) {
 							for (var j = 0; j < 16; j++) {
-								if (card_places[j] == summator[i]) {card_places[j] = 0;} }
-						stage.removeChild(used_cards[summator[i]-10]); }
+								if (card_places[j] == summator[i]) {card_places[j] = 0;}
+							}
+							stage.removeChild(used_cards[summator[i]-10]);
+						}
 						summator.splice(0, summator.length);
 						if (scopa()) { 
 							socket_ws.emit('scopa', {room: {{game_id}}, username : '{{g.user.nickname}}'});
-							if (user) { user1.push(1); }  else { user2.push(1); } }
-					} else { alert('Nauchis schitat');}
-					changeUser();
+						} else { alert('Nauchis schitat');}
+					socket_ws.emit('change_user', {room: {{game_id}} });
 					empty_hands();
 				}
 			}
@@ -457,7 +465,6 @@
 
 }
 
-//changeUser();
 
 
  
