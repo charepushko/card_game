@@ -4,6 +4,7 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/3.0.9/pixi.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="/static/js/Tween.js"></script>
 <style type="text/css">
    body {
@@ -17,16 +18,13 @@
 
 
     socket_ws.on('connect', function() {
-	console.log('join room triggered')
         socket_ws.emit('join', {username: '{{g.user.nickname}}', room: {{game_id}} });
-//        alert('{{g.user.name}} connected');
     });
 
 
 
-    socket_ws.on('start_game', function(data) { 
+    socket_ws.on('start_game', function() { 
          alert('all connected!'); 
-//	window.onload = function() {
 
 
 		var stage = new PIXI.Container();
@@ -34,7 +32,6 @@
 	        var renderer = new PIXI.autoDetectRenderer(800, 600, { transparent: true });
 	        document.body.appendChild(renderer.view);
 
-                var received_cards = JSON.parse(data)['array_cards']; 
 
 //arrays for places and cards
 
@@ -46,10 +43,22 @@
 
 		var summator = [];
 
+		var my_round = 0;
 
-
-
-
+		function empty_hands() {
+			console.log("empty hands opened");
+			var sum = 0;
+			for (var i = 10; i < 16; i++) {
+				sum += card_places[i];
+			}
+			if (sum == 0) {
+			        socket_ws.emit('need_round', {room: {{game_id}}, round : my_round});
+			}
+		}
+		console.log("variables declared");
+		empty_hands();
+//	        socket_ws.emit('need_round', {room: {{game_id}} });
+		
 //change user
 
 		var user1 = [];
@@ -73,7 +82,7 @@
 				}
 			}
 			user = !user;
-			if (user) { alert('��� ������'); } else { alert('��� �����'); }
+//			if (user) { alert('��� ������'); } else { alert('��� �����'); }
 		}
 
 
@@ -106,6 +115,7 @@
 						}
 					}
 					changeUser();
+					empty_hands();
 				}
 
 			}
@@ -117,6 +127,13 @@
 
 //sum check functions
 
+                function getPlace(picnum){
+                        for (var j = 15; j >= 0; j--) {
+                                if (card_places[j] == picnum) {
+                                        return j;
+                                }
+                        }
+                }
 
 		function handings() {
 			var j = 0;
@@ -166,12 +183,17 @@
 						if (scopa()) { if (user) { user1.push(1); }  else { user2.push(1); } }
 					} else { alert('Nauchis schitat');}
 					changeUser();
+					empty_hands();
 				}
 			}
 
+    socket_ws.on('round', function(data) { 
+	console.log("round started");
+        var received_cards = JSON.parse(data)['array_cards']; 
+	my_round = JSON.parse(data)['round'];
 
-
-for (var i = 0; i < 10; i++) {
+	
+	for (var i = 0; i < received_cards.length; i++) {
                 console.log(received_cards)
 		var picnum = received_cards[i];
 
@@ -235,13 +257,13 @@ for (var i = 0; i < 10; i++) {
 
 
 
-		function getPlace(picnum){
-			for (var j = 15; j >= 0; j--) {
-				if (card_places[j] == picnum) {
-					return j;
-				}
-			}
-		}
+//		function getPlace(picnum){
+//			for (var j = 15; j >= 0; j--) {
+//				if (card_places[j] == picnum) {
+//					return j;
+//				}
+//			}
+//		}
 
 		function onDragStart(event){
 			if (!this.user_block) {
@@ -349,15 +371,29 @@ for (var i = 0; i < 10; i++) {
 				var j;
 				for (var i = 0; i < summator.length; i++) { if (summator[i] == this.picnum) { j = i; }}
 				summator.splice(j, 1);
+			        socket_ws.emit('color', {'card': this.picnum, username : '{{g.user.nickname}}', room : {{game_id}}});
+
 			} else if (this.position.x == this.originx && this.position.y == this.originy  && !this.user_block) {
 				this.tint = 0xFF6060;
 				this.align = true;
 				summator.push(this.picnum);
+			        socket_ws.emit('color', {card: this.picnum, username : '{{g.user.nickname}}', room : {{game_id}}});
 			}
 
 
 			this.data = null;
 		}
+
+
+                socket_ws.on('card_color', function(data) {
+	                if ('{{g.user.nickname}}' != JSON.parse(data)['username']) {
+				var pic = JSON.parse(data)['card'];
+//				alert(pic);
+				if (used_cards[pic].tint ==  0xFFFFFF) { used_cards[pic].tint = 0xFF6060; 
+				} else { used_cards[pic].tint = 0xFFFFFF; }
+			} 
+		}); 
+
 
 		function onDragMove(){
 			if(this.dragging){
@@ -382,8 +418,12 @@ for (var i = 0; i < 10; i++) {
 	requestAnimationFrame(animate);
 
 }
-changeUser();
-//    };
+
+//changeUser();
+
+
+ 
+    });
 
 });
 

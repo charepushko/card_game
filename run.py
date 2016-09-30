@@ -25,6 +25,7 @@ class Gamestate(object):
         self.num_players = 0
         self.turn = 0
 	self.creator = 0
+	self.round = 0
         self.players = []
 	self.used_cards = [0 for i in range(40)]
 
@@ -151,19 +152,46 @@ def on_join(data):
     game.players.append(username)
     if (game.num_players == MAX_PLAYERS):
         print game.num_players
-        #create cards here!
-	pics = [0 for i in range(10)]
-	for i in range(10):
-             picnum = randint(10, 49)
-             while (game.used_cards[picnum-10] != 0 ):
-                 picnum = randint(10, 49)
-             game.used_cards[picnum-10] = 1
-             pics[i] = picnum
-
-        data = json.dumps({'array_cards' : pics})
-	print data
         emit('start_game', data, room=room, namespace='/ws', broadcast=True)
+#	rounding(json.dumps({'room' : room}))
 
+@socketio.on('need_round', namespace='/ws')
+def rounding(data):
+    room = data['room']
+    user_round = data['round']
+    game = GM.get_game(room)
+    if (user_round == game.round):
+        sum = 0
+        for i in range(40):
+	    sum += game.used_cards[i]
+        if (sum == 0):
+            max = 10
+        elif (sum < 40):
+            max = 6
+        else:
+            max = 0
+            emit('end_game', room=room,  namespace='/ws', broadcast=True)
+        if max:
+            pics = [0 for i in range(max)]
+            for i in range(max):
+                picnum = randint(10, 49)
+                while (game.used_cards[picnum-10] != 0 ):
+                    picnum = randint(10, 49)
+                game.used_cards[picnum-10] = 1
+                pics[i] = picnum
+            game.round += 1
+            data = json.dumps({'array_cards' : pics, 'round' : game.round})
+        emit('round', data, room=room, namespace='/ws', broadcast=True)
+
+
+@socketio.on('color', namespace='/ws')
+def on_color(data):
+	room = data['room']
+	card = data['card']
+	username = data['username']
+	print data
+	newd = json.dumps({'username' : username, 'card' : card})
+	emit('card_color', newd, room=room, namespace='/ws', broadcast=True)
 
 @socketio.on('leave', namespace='/ws')
 def on_leave(data):
