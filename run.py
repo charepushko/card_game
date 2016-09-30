@@ -44,7 +44,19 @@ class GameSessionManager(object):
         self.games[id] = Gamestate()
 
     def game_ids(self):
-        return self.games #.keys()
+	x = self.games
+	for i in x.keys():
+	    if self.get_game(i).num_players == 2:
+		x.pop(i)
+        return x #.keys()
+
+    def get_game_user(self, username):
+	x = self.games.keys()
+	for i in x:
+	    for j in range(2):
+                if self.games[i].players[j] == username:
+                    return i
+        return 0
 
     def get_game(self, id):
         return self.games[id]
@@ -65,6 +77,10 @@ def index():
     if g.user is None or not g.user.is_authenticated:
         return redirect(url_for('login'))
 
+    if GM.get_game_user(user.nickname) != 0:
+	print GM.get_game_user(user.nickname)
+        return redirect(url_for('game', game_id = GM.get_game_user(user.nickname)))
+
     return render_template('index.html',
         games=GM.game_ids(),
     )
@@ -73,6 +89,15 @@ def index():
 @lm.user_loader
 def load_user(id):
     return models.User.query.filter_by(id=id).first()
+
+
+@app.route('/rating', methods =  ['GET', 'POST'])
+def rating():
+    users = models.User.query.all()
+    return render_template('rating.html',
+        users = users,
+    )
+
 
 
 @app.route('/login', methods =  ['GET', 'POST'])
@@ -96,7 +121,7 @@ def login():
         k = False
         user = db.session.query(User).filter(User.email == form_s.email.data  or  User.nickname == form_s.login.data).first()
         if user is None:
-            u = User(nickname=form_s.login.data, email=form_s.email.data, password=md5(form_s.password.data).hexdigest())
+            u = User(nickname=form_s.login.data, email=form_s.email.data, password=md5(form_s.password.data).hexdigest(), scopas=0, games=0, wins=0, score=0)
             db.session.add(u)
             db.session.commit()
             login_user(u)
@@ -151,6 +176,7 @@ def on_join(data):
     game.room = room # if game.room != 0 else game.room
     join_room(room)
     game.players.append(username)
+    print game.players
     if (game.num_players == MAX_PLAYERS):
 	cr = game.creator
 	ndata = json.dumps({'creator_id' : cr})

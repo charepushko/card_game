@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+        <div class="row" align="center">
+       
+            <div class="col-md-2">  </div>
+       
+            <div class="col-md-2" style="background: rgba(131, 148, 4, 0.8); height: 600px; color: #05062A;"> <br>
+		    <button type="button" class="btn" style="background: linear-gradient(to top, #3A1200,  #802800); color: #EEEEEE;" onClick='location.href="/create_game"'>
+			    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Create Game
+		    </button>
+	    </div>
+
+            <div class="col-md-6" style="background: rgba(211, 169, 64, 0.8);  height: 600px; color: #05062A;">
+<br>
+                <div class="row" width="93%" style="background: rgba(156, 48, 11, 0.4);">
+                            <div class="col-md-2"  align="center"> <i> Name </i> </div>
+                            <div class="col-md-3"  align="center"> <i> Total score </i> </div>
+                            <div class="col-md-2"  align="center"> <i> Scopas </i> </div>
+                            <div class="col-md-3"  align="center"><i> Total games </i>  </div>
+                            <div class="col-md-2"  align="center"> <i> Win</i>  </div>
+                    </div><br>
+
+		{% for user in users %}
+		    <div class="row" width="96%">
+			    <div class="col-md-3"  align="center"> <b>{{user.nickname}}</b> </div>
+			    <div class="col-md-3"  align="left"> {{user.score}} </div>
+			    <div class="col-md-2"  align="left"> {{user.scopas}} </div>
+			    <div class="col-md-2"  align="center"> {{user.games}} </div>
+			    <div class="col-md-2"  align="center"> {{user.wins}} </div>
+		    </div><hr>
+		{% endfor %}
+		
+	    </div>
+
+            <div class="col-md-2"></div>
+
+        </div>
+
+{% endblock %}
