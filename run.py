@@ -224,7 +224,7 @@ def take(data):
 	emit('card_taken', data, room=room, namespace='/ws', broadcast=True)
 
 @socketio.on('game_end', namespace='/ws')
-def take(data):
+def g_end(data):
 	room = data['room']
 	username = data['username']
 	game = GM.get_game(room)
@@ -258,7 +258,6 @@ def take(data):
 		user1 += 1
 	else:
 		user2 += 1
-
 	data = json.dumps({'user1' : user1, 'user2' : user2, 'scopa1' : game.score[40], 'scopa2' : game.score[41]})
 	emit('results', data, room=room, namespace='/ws', broadcast=True)
 

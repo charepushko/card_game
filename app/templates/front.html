@@ -43,6 +43,7 @@
 		for (var i = 0; i < 16; i++) { card_places[i] = 0; }
 
 		var summator = [];
+		var turn;
 
 		var last_get_name = '';
 		var my_round = 0;
@@ -66,11 +67,10 @@
 		var user2 = [];
 
 		socket_ws.on('user_change', function(data) {
-			var turn = JSON.parse(data)['turn'];
-                        for (var i = 0; i < 10; i++) {
-                                if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = false; }
-                        }
-
+			turn = JSON.parse(data)['turn'];
+			for (var i = 0; i < 10; i++) {
+				if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = false; }
+			}
 			if (({{g.user.id}} == creator) && (turn == false)) {
 				for (var i = 10; i < 13; i++) {
 					if (card_places[i] != 0) { used_cards[card_places[i]-10].user_block = true; }
@@ -94,8 +94,7 @@
 			}
 		});
 
-	        if ({{g.user.id}} == creator) { socket_ws.emit('change_user', {room: {{game_id}} }); }
-		
+//        if ({{g.user.id}} == creator) { socket_ws.emit('change_user', {room: {{game_id}} }); }		
 
 
 //lay functions
@@ -119,7 +118,7 @@
 						if (laid > 0 && card_places[i] == laid) {
 							 used_cards[laid-10].originx = used_cards[laid-10].position.x;
 							 used_cards[laid-10].originy = used_cards[laid-10].position.y;
-//							 used_cards[laid-10].block = false;
+							 used_cards[laid-10].user_block = false;
 							 socket_ws.emit('card_laid', {room: {{game_id}}, username : '{{g.user.nickname}}', laid : laid, i : i, x : used_cards[laid-10].originx, y : used_cards[laid-10].originy});
 							 card_places[i] = 0;
 							 laid = 0;
@@ -142,11 +141,10 @@
                         used_cards[laid1-10].originy = y1;
                         used_cards[laid1-10].position.x = x1;
                         used_cards[laid1-10].position.y = y1;
-//			used_cards[laid1-10].block = false;
-                        card_places[i1] = 0;			
-		}		
+			used_cards[laid1-10].user_block = false;
+                        card_places[i1] = 0;
+		}
 	});
-			
 
 
 
@@ -258,34 +256,40 @@
 			card_back.anchor.y = 0.5;
 			card_back.scale.x = 1;
 			card_back.scale.y = 1;
+			card_back.user_block = false;
 
 
 //card placement
+			
 			if (i < 3) {
 				card_back.position.x = 290 + (i)*102;
 				card_back.position.y = 105;
-				card_places[10+i] = picnum;}
+				card_places[10+i] = picnum;
+				card_back.user_block = true;}
 			else if (i > 2 && i < 6) {
 				card_back.position.x = 290 + (i-3)*102;
 				card_back.position.y = 483;
-				card_places[10+i] = picnum;}
+				card_places[10+i] = picnum;
+				if({{g.user.id}} != creator) { card_back.user_block = true;}}
 			else if (i > 6 && i < 9) {
 				card_back.position.x = 394;
 				card_back.position.y = 232 + (i-7)*122;
-				if (i ==8) { card_places[7] = picnum;} else { card_places[2] = picnum; } }
+				if (i ==8) { card_places[7] = picnum;} else { card_places[2] = picnum; }
+				if({{g.user.id}} != creator) { card_back.user_block = true;} }
 			else if (i == 6) {
 				card_back.position.x = 312;
 				card_back.position.y = 232;
-				card_places[1] = picnum;}
+				card_places[1] = picnum;
+				if({{g.user.id}} != creator) { card_back.user_block = true;}}
 			else if (i == 9) {
 				card_back.position.x = 476;
 				card_back.position.y = 354;
-				card_places[8] = picnum;}
+				card_places[8] = picnum;
+				if({{g.user.id}} != creator) { card_back.user_block = true;}}
 
 
 
 			card_back.picnum = picnum;
-			card_back.user_block = false;
 			card_back.originx = card_back.position.x;
 			card_back.originy = card_back.position.y;
 
@@ -295,13 +299,13 @@
 
 	socket_ws.on('end_game', function() {
 		alert("end of game, await for results");
-		socket_ws.emit('game_end', {room: {{game_id}}, username : last_get_name, taken : JSON.stringify(card_places)});
+		if (creator == '{{g.user.nickname}}') { socket_ws.emit('game_end', {room: {{game_id}}, username : last_get_name, taken : JSON.stringify(card_places)}); }
 	});
 
 	socket_ws.on('results', function(data){
 		if ('{{g.user.nickname}}' == creator) { alert("Your score: " + data['user1'] + "\n Your scopas: " + data['scopa1'] + "\n \n His score: " + data['user2'] + "\n His scopas: " + data['scopa2']);}		
 		else { alert("Your score: " + data['user2'] + "\n Your scopas: " + data['scopa2'] + "\n \n His score: " + data['user1'] + "\n His scopas: " + data['scopa1']);}		
-		socket_ws.emit('end', {room : {{game_id}}});
+		if (creator == '{{g.user.nickname}}') { socket_ws.emit('end', {room : {{game_id}}}); }
 	});	
 
 
@@ -436,18 +440,22 @@
 						for (var i = 0; i < 10; i++) { if (card_places[i] == this.picnum) { card_places[i] = 0;}}
 					}
 					laid = 0; }
+				socket_ws.emit('card_drag', {room: {{game_id}}, username : '{{g.user.nickname}}', card : this.picnum, x : this.position.x, y : this.position.y});
+
 
 			if(this.align && !this.user_block){
 				this.tint = 0xFFFFFF;
 				this.align = false;
 				var j;
 				for (var i = 0; i < summator.length; i++) { if (summator[i] == this.picnum) { j = i; }}
+//				laid = 0;
 				summator.splice(j, 1);
 			        socket_ws.emit('color', {'card': this.picnum, username : '{{g.user.nickname}}', room : {{game_id}}});
 
 			} else if (this.position.x == this.originx && this.position.y == this.originy  && !this.user_block) {
 				this.tint = 0xFF6060;
 				this.align = true;
+//				laid = 0;
 				summator.push(this.picnum);
 			        socket_ws.emit('color', {card: this.picnum, username : '{{g.user.nickname}}', room : {{game_id}}});
 			}
@@ -493,7 +501,8 @@
 //			} 
 //		}); 
 
-}
+	}
+        if ({{g.user.id}} == creator &&  received_cards.length == 10) { socket_ws.emit('change_user', {room: {{game_id}} }); }
 
 
 
