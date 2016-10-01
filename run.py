@@ -278,8 +278,23 @@ def g_end(data):
 		user1 += 1
 	else:
 		user2 += 1
+        u2 = models.User.query.filter_by(nickname=game.players[2]).first()
+        user.score += user1
+        u2.score += user2
+        user.scopas += game.score[40]
+        u2.scopas += game.score[41]
+        user.games += 1
+        u2.games += 1
+        if user1 > user2:
+                user.wins += 1
+        else:
+                u2.wins += 1
+        db.session.add(user)
+        db.session.commit()
+        db.session.add(u2)
+        db.session.commit()
+
 	data = json.dumps({'user1' : user1, 'user2' : user2, 'scopa1' : game.score[40], 'scopa2' : game.score[41]})
-	print data
 	emit('results', data, room=room, namespace='/ws', broadcast=True)
 
 
