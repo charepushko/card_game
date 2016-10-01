@@ -297,17 +297,6 @@
 			used_cards[picnum-10] = card_back;
 
 
-	socket_ws.on('end_game', function() {
-		alert("end of game, await for results");
-		if (creator == '{{g.user.nickname}}') { socket_ws.emit('game_end', {room: {{game_id}}, username : last_get_name, taken : JSON.stringify(card_places)}); }
-	});
-
-	socket_ws.on('results', function(data){
-		if ('{{g.user.nickname}}' == creator) { alert("Your score: " + data['user1'] + "\n Your scopas: " + data['scopa1'] + "\n \n His score: " + data['user2'] + "\n His scopas: " + data['scopa2']);}		
-		else { alert("Your score: " + data['user2'] + "\n Your scopas: " + data['scopa2'] + "\n \n His score: " + data['user1'] + "\n His scopas: " + data['scopa1']);}		
-		if (creator == '{{g.user.nickname}}') { socket_ws.emit('end', {room : {{game_id}}}); }
-	});	
-
 
 	socket_ws.on('card_drag', function(data) {
 		var user1 = data['username'];
@@ -506,8 +495,31 @@
 
 
 
+
  
     });
+
+	socket_ws.on('end_game', function() {
+		if (creator == {{g.user.id}}) {
+			socket_ws.emit('game_end', {room: {{game_id}}, username : last_get_name, taken : JSON.stringify(card_places)});
+		}
+	});
+
+	socket_ws.on('results', function(data){
+		var user1 = JSON.parse(data)['user1'];
+		var user2 = JSON.parse(data)['user2'];
+		var scopa1 = JSON.parse(data)['scopa1'];
+		var scopa2 = JSON.parse(data)['scopa2'];
+
+		if ({{g.user.id}} == creator) { 
+			alert("Your score: " + user1 + "\n Your scopas: " + scopa1 + "\n \n His score: " + user2 + "\n His scopas: " + scopa2);
+		}		
+		else { 
+			alert("Your score: " + user2 + "\n Your scopas: " + scopa2 + "\n \n His score: " + user1 + "\n His scopas: " + scopa1);
+		}
+		socket_ws.emit('endd', {room : {{game_id}}, username : '{{g.user.nickname}}' });
+		window.location.href = "/index"; 
+	});	
 
 });
 

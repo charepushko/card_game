@@ -26,9 +26,11 @@ class Gamestate(object):
         self.turn = True
 	self.creator = 0
 	self.round = 0
+	self.on_leaving = False
         self.players = []
-	self.used_cards = [0 for i in range(40)]
-	self.score = [0 for i in range(42)]
+	self.used_cards = [1 for i in range(40)]
+	self.score = [2 for i in range(42)]
+
 
     def get_creator(self):
         u = load_user(self.creator)
@@ -46,17 +48,9 @@ class GameSessionManager(object):
     def game_ids(self):
 	x = self.games
 	for i in x.keys():
-	    if self.get_game(i).num_players == 2:
+	    if (self.get_game(i).num_players == 2) or self.get_game(i).on_leaving:
 		x.pop(i)
         return x #.keys()
-
-    def get_game_user(self, username):
-	x = self.games.keys()
-	for i in x:
-	    for j in range(2):
-                if self.games[i].players[j] == username:
-                    return i
-        return 0
 
     def get_game(self, id):
         return self.games[id]
@@ -77,9 +71,9 @@ def index():
     if g.user is None or not g.user.is_authenticated:
         return redirect(url_for('login'))
 
-    if GM.get_game_user(user.nickname) != 0:
-	print GM.get_game_user(user.nickname)
-        return redirect(url_for('game', game_id = GM.get_game_user(user.nickname)))
+#    if GM.get_game_user(user.nickname) != 0:
+#	print GM.get_game_user(user.nickname)
+ #       return redirect(url_for('game', game_id = GM.get_game_user(user.nickname)))
 
     return render_template('index.html',
         games=GM.game_ids(),
@@ -285,6 +279,7 @@ def g_end(data):
 	else:
 		user2 += 1
 	data = json.dumps({'user1' : user1, 'user2' : user2, 'scopa1' : game.score[40], 'scopa2' : game.score[41]})
+	print data
 	emit('results', data, room=room, namespace='/ws', broadcast=True)
 
 
@@ -317,21 +312,17 @@ def on_color(data):
 
 
 
-@socketio.on('end', namespace='/ws')
+@socketio.on('endd', namespace='/ws')
 def on_leave(data):
-    username = g.user.nickname
+    username = data['username']
     game_id = room = data['room']
-    emit('join', username + ' has left the room.', room=room,
-                                                    namespace='/ws',
-                                                    broadcast=True,
-                                                    callback=ack)
     game = GM.get_game(game_id)
+    game.on_leaving = True
     game.players.remove(username)
     game.num_players -= 1
+    leave_room(room)
     if game.num_players == 0:
 	del GM.games[game_id]
-    leave_room(room)
-    return render_template('index.html', games = GM.game_ids(), )
 
 
 
