@@ -90,3 +90,12 @@ mysql --user=<your user> --password=<your password> --database=<your database na
 1. apt-get clean
 2. Предварительно нужно создать внутреннюю сеть VirtualBox (File -> Preferences -> Network -> Host-only networks -> Add)
 3.  ip a l, eth1
+
+ii  libmysqlclient-dev                 
+ii  libmysqlclient20:amd64 
+ii  mysql-client-5.7 
+ii  mysql-client-core-5.7 
+ii  mysql-common                       
+ii  mysql-server    
+ii  mysql-server-5.7  
+ii  mysql-server-core-5.7  
