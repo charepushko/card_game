@@ -28,8 +28,8 @@ class Gamestate(object):
 	self.round = 0
 	self.on_leaving = False
         self.players = []
-	self.used_cards = [1 for i in range(40)]
-	self.score = [2 for i in range(42)]
+	self.used_cards = [0 for i in range(40)]
+	self.score = [0 for i in range(42)]
 
 
     def get_creator(self):
