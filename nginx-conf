@@ -1,0 +1,14 @@
+
+server {
+    listen 80;
+    access_log  /var/log/nginx/access.log;
+    root /root/annet_cardgame/github/card_game/app;
+
+    location /static {
+        root /root/annet_cardgame/github/card_game/app;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+    }
+}
