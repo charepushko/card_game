@@ -92,5 +92,11 @@ Flush Privileges;
 exit;
 
 7. Теперь можно зайти под своим пользователем в базу и выполнять операции
-mysql -–user=<your user> –-password=<your password> –-database=<your database name>
+mysql --user=<your user> --password=<your password> --database=<your database name>
+
+
+1. У кого не получается ничего сделать с ошибкой No space left, нужно зайти пользователем root, а затем - набрать команду apt-get clean
+2. Предварительно нужно создать внутреннюю сеть VirtualBox (File -> Preferences -> Network -> Host-only networks -> Add)
+3. После запуска виртуалки и входа в систему, наберите команду ip a l, и посмотрите IP-адрес у интерфейса eth1, присвоенный внутренним DHCP-сервером VirtualBox'а. Этот адрес нужно набрать в адресной строке браузера на хост-машине.
+4. В адресной строке не нужно явно указывать номер порта. Настроен прокси-сервер, который виден по стандартному 80-му порту, и лезет на порт 8000 (дефолтный для Django) локальной машины. Если используется не Django, то номер порта можно поправить в файле /etc/nginx/sites-available/proxy_8000.
 
